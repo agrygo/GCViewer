@@ -1,0 +1,126 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>Basemap Toggle Dijit</title>
+    <link rel="stylesheet" type="text/css" href="http://jsdev.arcgis.com/3.12/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="http://jsdev.arcgis.com/3.12/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" type="text/css" href="css/BasemapToggle.css">
+    <style type="text/css">
+    body{
+            margin:40px;
+            padding:20px;
+        }
+        .container{
+            position:relative;
+            padding: 10px;
+            border: 1px solid #eee;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+        }
+        #map{
+            width:100%;
+            height: 500px;
+            position: relative;
+        }
+        #BasemapToggle{
+            position: absolute;
+            top:20px;
+            right:20px;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="claro">
+    <div class="container">
+        <div id="map" class="map">
+            <div id="BasemapToggle"></div>
+        </div>
+    </div>
+    <h2>All options</h2>
+    <!--<script src="https://gist.github.com/driskull/6226473.js"></script>-->
+    <script src="../BasemapToggle/js/BasemapToggle.js"></script>
+    <script type="text/javascript">
+        var package_path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+        var dojoConfig = {
+            // The locationPath logic below may look confusing but all its doing is 
+            // enabling us to load the api from a CDN and load local modules from the correct location.
+            packages: [{
+                name: "application",
+                location: package_path + '/js'
+            }]
+        };
+    </script>
+    <script src="http://jsdev.arcgis.com/3.12/" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        require(["esri/map", "application/BasemapToggle", "esri/arcgis/utils", "dojo/_base/lang", "dojo/on"], function(Map,BasemapToggle,arcgisUtils, lang, on){
+
+            var map;
+            
+            function mapLoaded(){
+            
+                myWidget = new BasemapToggle({
+                    basemap: "hybrid",
+                    defaultBasemap: "topo",
+                    map: map,
+                }, "BasemapToggle");
+                myWidget.startup();
+                
+                myWidget.on('toggle', function(evt){
+                   console.log(evt); 
+                });
+                
+                
+                /* Start temporary until after JSAPI 3.8 is released */
+                var layers = map.getLayersVisibleAtScale(map.getScale());
+                on.once(map, 'basemap-change', lang.hitch(this, function(){
+                    for(var i = 0; i < layers.length; i++){
+                        if(layers[i]._basemapGalleryLayerType){
+                            var layer = map.getLayer(layers[i].id);
+                            map.removeLayer(layer);
+                        }
+                    }
+                }));
+                /* END temporary until after JSAPI 3.8 is released */
+                
+                
+            }
+            
+            
+            
+            arcgisUtils.createMap('376ac7b2704c4bca9c1abf3c6e447569', "map", {
+                mapOptions: {
+                    //Optionally define additional map config here for example you can 
+                    //turn the slider off, display info windows, disable wraparound 180, slider position and more. 
+                }
+            }).then(lang.hitch(this, function(response) {
+                //Once the map is created we get access to the response which provides important info 
+                //such as the map, operational layers, popup info and more. This object will also contain
+                //any custom options you defined for the template. In this example that is the 'theme' property.
+                //Here' we'll use it to update the application to match the specified color theme.  
+                map = response.map;
+                if (map.loaded) {
+                    // do something with the map
+                    mapLoaded();
+                } else {
+                    on(map, "load", lang.hitch(this, function() {
+                        // do something with the map
+                        mapLoaded();
+                    }));
+                }
+            }), lang.hitch(this, function(error) {
+                //an error occurred - notify the user. In this example we pull the string from the 
+                //resource.js file located in the nls folder because we've set the application up 
+                //for localization. If you don't need to support mulitple languages you can hardcode the 
+                //strings here and comment out the call in index.html to get the localization strings. 
+
+            }));
+            
+            
+
+        });
+    </script>
+</body>
+</html>
