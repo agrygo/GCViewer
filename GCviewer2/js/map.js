@@ -3,6 +3,9 @@ var map;
 require([
 	"esri/map",
 	"esri/geometry/Extent",
+	"esri/layers/ArcGISDynamicMapServiceLayer",
+
+	"esri/dijit/Scalebar",
 
 	"dojo/ready",
 	"dojo/parser",
@@ -11,7 +14,10 @@ require([
 	"dijit/layout/BorderContainer",
 	"dijit/layout/ContentPane"],
 
-	function(Map, Extent, ready, parser, on, BorderContainer, ContentPane
+	function(Map, Extent, ArcGISDynamicMapServiceLayer, 
+		Scalebar,
+		ready, parser, on,
+		BorderContainer, ContentPane
 	){
 	
 	ready(function(){
@@ -29,8 +35,20 @@ require([
         "ymax":4801939.947093327,
         "spatialReference":{"wkid":102100,"latestWkid":3857}
       	})
-      	
-	});
+    });
+
+	lyrCadastral = new ArcGISDynamicMapServiceLayer(
+		"http://vgis8app:6080/arcgis/rest/services/Development/GC_Cadastral/MapServer",{
+
+		});
+	map.addLayer(lyrCadastral);
+
+	Scalebar = new Scalebar({
+		map:map,
+		scalebarUnit:"dual",
+		attachTo:"bottom-left"
+	})
+	
 });
 });
 
