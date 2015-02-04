@@ -4,8 +4,11 @@ require([
 	"esri/map",
 	"esri/geometry/Extent",
 	"esri/layers/ArcGISDynamicMapServiceLayer",
+	"esri/layers/FeatureLayer",
 
 	"esri/dijit/Scalebar",
+	"esri/dijit/Popup",
+	"esri/dijit/PopupTemplate",
 
 	"dojo/ready",
 	"dojo/parser",
@@ -14,8 +17,8 @@ require([
 	"dijit/layout/BorderContainer",
 	"dijit/layout/ContentPane"],
 
-	function(Map, Extent, ArcGISDynamicMapServiceLayer, 
-		Scalebar,
+	function(Map, Extent, ArcGISDynamicMapServiceLayer, FeatureLayer,
+		Scalebar, Popup, PopupTemplate, 
 		ready, parser, on,
 		BorderContainer, ContentPane
 	){
@@ -37,11 +40,26 @@ require([
       	})
     });
 
-	lyrCadastral = new ArcGISDynamicMapServiceLayer(
+	/*lyrCadastral = new ArcGISDynamicMapServiceLayer(
 		"http://vgis8app:6080/arcgis/rest/services/Development/GC_Cadastral/MapServer",{
 
-		});
-	map.addLayer(lyrCadastral);
+		});*/
+
+	template = new PopupTemplate({
+          title: "<b>Parcel {PARCELNB}</b>",
+          description: '<table><tr><b>Parcel Number</b> {PARCELNB}</tr><br> <tr><b>Address</b> {FULLADDRESS}</tr><br><tr>{LOCCITY}</tr> <br><tr><b>Owner</b> {NAME}</tr> <br><tr><b>Mailing Address</b> {ADDRESS2}</tr> <br><tr>{CITY}, {STATE} {ZIPCODE}</tr> </table><br> <a target="_blank" href="http://garfield.valuewest.net/?parcelno={PARCELNB}"><b>Garfield County Treasurer Data</b<</a> <br> <a target="_blank" href="https://act.garfield-county.com/treasurer/treasurerweb/account.jsp?account={ACCOUNTNO}"><b>Garfield County Assessor Data</b<</a>',
+    
+    });
+
+	lyrParcels = new FeatureLayer("http://vgis8app:6080/arcgis/rest/services/Development/GC_Cadastral/MapServer/3",{
+          mode: FeatureLayer.MODE_ONDEMAND,
+          outFields: ["*"],
+          infoTemplate: template
+        });
+	map.addLayer(lyrParcels);
+	
+
+	
 
 	Scalebar = new Scalebar({
 		map:map,
